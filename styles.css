@@ -29,6 +29,12 @@ body {
 button,
 input {
   font: inherit;
+  color: inherit;
+}
+
+button {
+  appearance: none;
+  -webkit-appearance: none;
 }
 
 .page-shell {
@@ -78,17 +84,18 @@ input {
 
 .step-pills {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   flex-wrap: wrap;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .step-pill {
-  padding: 10px 16px;
+  padding: 9px 14px;
   border: 3px solid var(--line);
   border-radius: 999px;
   background: #fff;
   color: var(--muted);
+  font-size: 0.96rem;
   font-weight: 700;
 }
 
@@ -174,6 +181,11 @@ input[type="date"] {
   border-radius: 18px;
   background: #fff;
   color: var(--text);
+}
+
+#date-input {
+  width: min(100%, 280px);
+  justify-self: center;
 }
 
 .field.is-centered input[type="text"] {
@@ -423,12 +435,15 @@ button:focus-visible {
 .category-tag {
   display: inline-flex;
   align-items: center;
-  min-height: 42px;
-  padding: 8px 12px;
+  min-height: 38px;
+  padding: 7px 11px;
   border: 3px solid var(--line);
   border-radius: 14px;
   background: #fff;
+  color: var(--text);
+  font-size: 0.96rem;
   font-weight: 700;
+  text-decoration: none;
   white-space: nowrap;
 }
 
@@ -454,11 +469,14 @@ button:focus-visible {
 .item-chip {
   display: inline-flex;
   align-items: center;
-  min-height: 38px;
-  padding: 8px 12px;
+  min-height: 34px;
+  padding: 6px 10px;
   border: 2px solid var(--soft-line);
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.9);
+  color: var(--text);
+  font-size: 0.94rem;
+  text-decoration: none;
 }
 
 .add-item-btn {
@@ -587,16 +605,36 @@ button:focus-visible {
     border-radius: 26px;
   }
 
+  .step-pills {
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .step-pill {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+  }
+
   .panel-heading h2 {
     font-size: 2rem;
   }
 
+  #date-input {
+    width: min(100%, 228px);
+  }
+
   .category-row {
-    grid-template-columns: auto minmax(0, 1fr);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 10px;
   }
 
   .category-tag {
     justify-self: flex-start;
+    min-height: 34px;
+    padding: 6px 10px;
+    font-size: 0.88rem;
   }
 
   .category-editor {
@@ -608,6 +646,17 @@ button:focus-visible {
     width: 100%;
     max-width: none;
     min-width: 0;
+  }
+
+  .item-list {
+    display: contents;
+    gap: 6px;
+  }
+
+  .item-chip {
+    min-height: 30px;
+    padding: 5px 9px;
+    font-size: 0.86rem;
   }
 
   .inline-editor-actions {
