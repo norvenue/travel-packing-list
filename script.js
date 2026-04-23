@@ -74,6 +74,8 @@ const state = {
   confirmCategoryIndex: null,
 };
 
+let categorySortable = null;
+
 const elements = {
   heroTitle: document.getElementById("hero-title"),
   heroIntro: document.getElementById("hero-intro"),
@@ -280,6 +282,58 @@ function updateBagFigure() {
   });
 }
 
+function canSortCategories() {
+  return typeof window.Sortable === "function";
+}
+
+function moveCategory(oldIndex, newIndex) {
+  if (
+    oldIndex === newIndex ||
+    oldIndex < 0 ||
+    newIndex < 0 ||
+    oldIndex >= state.categories.length ||
+    newIndex >= state.categories.length
+  ) {
+    return;
+  }
+
+  const [movedCategory] = state.categories.splice(oldIndex, 1);
+  state.categories.splice(newIndex, 0, movedCategory);
+  persistState();
+  renderCategories();
+}
+
+function initializeCategorySorting() {
+  if (!canSortCategories() || categorySortable) {
+    return;
+  }
+
+  categorySortable = window.Sortable.create(elements.categoryList, {
+    draggable: ".category-row",
+    handle: ".drag-handle",
+    animation: 150,
+    delay: 140,
+    delayOnTouchOnly: true,
+    touchStartThreshold: 8,
+    fallbackOnBody: true,
+    chosenClass: "sortable-chosen",
+    ghostClass: "sortable-ghost",
+    dragClass: "sortable-drag",
+    disabled: Boolean(state.editing),
+    onEnd(event) {
+      moveCategory(event.oldIndex, event.newIndex);
+    },
+  });
+}
+
+function updateCategorySortingState() {
+  if (!categorySortable) {
+    return;
+  }
+
+  categorySortable.option("disabled", Boolean(state.editing));
+}
+
 function isEditingCategory(categoryIndex) {
   return state.editing?.type === "category" && state.editing.categoryIndex === categoryIndex;
 }
@@ -315,14 +369,26 @@ function getInlineEditorInput() {
 }
 
 function focusInlineEditor() {
+  const input = getInlineEditorInput();
+  if (!input) {
+    return;
+  }
+
+  input.focus({ preventScroll: true });
+  input.click();
+
+  if (typeof input.setSelectionRange === "function") {
+    input.setSelectionRange(0, input.value.length);
+  } else {
+    input.select();
+  }
+
   requestAnimationFrame(() => {
-    const input = getInlineEditorInput();
-    if (!input) {
+    if (document.activeElement === input) {
       return;
     }
 
-    input.focus();
-    input.select();
+    input.focus({ preventScroll: true });
   });
 }
 
@@ -495,6 +561,8 @@ function createInlineEditorInput(value, ariaLabel, maxLength) {
   input.type = "text";
   input.value = value;
   input.maxLength = maxLength;
+  input.autocomplete = "off";
+  input.enterKeyHint = "done";
   input.className = "inline-editor-input";
   input.setAttribute("aria-label", ariaLabel);
   input.setAttribute("data-inline-editor-input", "true");
@@ -516,16 +584,39 @@ function createInlineEditorActions(includeDelete = false) {
   const actions = document.createElement("div");
   actions.className = "inline-editor-actions";
 
-  const saveButton = createInlineActionButton("保存", "inline-editor-btn is-primary", saveInlineEditing);
   const cancelButton = createInlineActionButton("取消", "inline-editor-btn", cancelInlineEditing);
-  actions.append(saveButton, cancelButton);
+  const saveButton = createInlineActionButton("保存", "inline-editor-btn is-primary", saveInlineEditing);
 
   if (includeDelete) {
     const deleteButton = createInlineActionButton("删除", "inline-editor-btn is-danger", deleteEditingItem);
-    actions.append(deleteButton);
+    actions.append(deleteButton, cancelButton, saveButton);
+    return actions;
   }
 
+  actions.append(cancelButton, saveButton);
   return actions;
+}
+
+function createDragHandle(category) {
+  const handle = document.createElement("button");
+  const isDisabled = Boolean(state.editing) || !canSortCategories();
+  handle.className = "drag-handle";
+  handle.type = "button";
+  handle.setAttribute("aria-label", `拖动调整${category.name}分类顺序`);
+  handle.setAttribute("title", isDisabled ? "请先完成当前编辑" : "按住拖动调整顺序");
+  handle.disabled = isDisabled;
+  if (isDisabled) {
+    handle.classList.add("is-disabled");
+  }
+
+  for (let index = 0; index < 3; index += 1) {
+    const bar = document.createElement("span");
+    bar.className = "drag-handle-bar";
+    bar.setAttribute("aria-hidden", "true");
+    handle.appendChild(bar);
+  }
+
+  return handle;
 }
 
 function createCategoryTag(category, categoryIndex) {
@@ -584,6 +675,12 @@ function renderCategories() {
   state.categories.forEach((category, categoryIndex) => {
     const row = document.createElement("div");
     row.className = "category-row";
+    row.setAttribute("data-category-index", String(categoryIndex));
+
+    const head = document.createElement("div");
+    head.className = "category-head";
+
+    const dragHandle = createDragHandle(category);
 
     const tag = isEditingCategory(categoryIndex)
       ? createCategoryEditor(category, categoryIndex)
@@ -618,10 +715,13 @@ function renderCategories() {
     actions.className = "category-actions";
     actions.append(addButton, removeButton);
 
+    head.append(dragHandle, tag);
     itemList.append(actions);
-    row.append(tag, itemList);
+    row.append(head, itemList);
     elements.categoryList.appendChild(row);
   });
+
+  updateCategorySortingState();
 }
 
 function openModal() {
@@ -935,4 +1035,5 @@ updateSummary();
 updateStep(state.currentStep);
 updateBagFigure();
 renderCategories();
+initializeCategorySorting();
 persistState();

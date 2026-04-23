@@ -367,6 +367,49 @@ button:focus-visible {
   background: rgba(247, 241, 230, 0.6);
 }
 
+.category-head {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 0;
+}
+
+.drag-handle {
+  display: inline-grid;
+  gap: 3px;
+  place-items: center;
+  width: 40px;
+  min-width: 40px;
+  min-height: 38px;
+  padding: 7px 8px;
+  border: 3px solid var(--line);
+  border-radius: 14px;
+  background: #fff7ec;
+  color: var(--muted);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+.drag-handle.is-disabled,
+.drag-handle:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.drag-handle-bar {
+  display: block;
+  width: 12px;
+  height: 2px;
+  border-radius: 999px;
+  background: currentColor;
+}
+
 .category-actions {
   display: inline-flex;
   align-items: flex-start;
@@ -477,6 +520,19 @@ button:focus-visible {
   color: var(--text);
   font-size: 0.94rem;
   text-decoration: none;
+}
+
+.sortable-chosen {
+  box-shadow: 0 8px 18px rgba(106, 74, 47, 0.12);
+}
+
+.sortable-ghost {
+  opacity: 0.45;
+  background: rgba(234, 213, 181, 0.35);
+}
+
+.sortable-drag {
+  transform: rotate(1deg);
 }
 
 .add-item-btn {
@@ -628,6 +684,18 @@ button:focus-visible {
     flex-wrap: wrap;
     gap: 10px;
     padding: 10px;
+  }
+
+  .category-head {
+    gap: 6px;
+  }
+
+  .drag-handle {
+    width: 34px;
+    min-width: 34px;
+    min-height: 34px;
+    padding: 6px 7px;
+    border-radius: 12px;
   }
 
   .category-tag {
